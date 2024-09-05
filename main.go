@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 func fetchURL() {
+	baseURL := "http://158.178.197.230:8081"
+
 	// Request the HTML page.
-	res, err := http.Get("http://158.178.197.230:8081")
+	res, err := http.Get(baseURL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -19,21 +22,39 @@ func fetchURL() {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
-	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Find the review items
+	// Parser l'URL de base
+	base, err := url.Parse(baseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var urls []string
+
+	// trouver les liens
 	doc.Find("a[href]").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the title
 		link, ok := s.Attr("href")
 		if !ok {
 			return
 		}
-		fmt.Println(link)
+
+		parsedLink, err := url.Parse(link)
+		if err != nil {
+			log.Println("Erreur parsing URL:", err)
+			return
+		}
+
+		fullURL := base.ResolveReference(parsedLink)
+
+		urls = append(urls, fullURL.String())
 	})
+
+	fmt.Println(urls)
+
 }
 
 func main() {
