@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-rod/rod"
 	"log"
 	"net/http"
 	"net/url"
@@ -10,7 +11,7 @@ import (
 )
 
 func fetchURL() {
-	baseURL := "http://158.178.197.230:8081"
+	baseURL := "http://158.178.197.230:8081/index.html"
 
 	// Request the HTML page.
 	res, err := http.Get(baseURL)
@@ -21,6 +22,7 @@ func fetchURL() {
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
+	log.Print()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
@@ -58,5 +60,8 @@ func fetchURL() {
 }
 
 func main() {
-	fetchURL()
+	log.Println("Fetching URL")
+	page := rod.New().MustConnect().MustPage("https://www.instagram.com/")
+	page.MustWaitStable().MustScreenshot("a.png")
+	log.Println("URL fetched")
 }
