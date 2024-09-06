@@ -61,7 +61,14 @@ func fetchURL() {
 
 func main() {
 	log.Println("Fetching URL")
-	page := rod.New().MustConnect().MustPage("https://www.instagram.com/")
-	page.MustWaitStable().MustScreenshot("a.png")
+	page := rod.New().MustConnect().MustPage("https://kodoka.fr/")
+	links := page.MustElements("a")
+
+	for _, link := range links {
+		href := link.MustAttribute("href")
+		if href != nil {
+			fmt.Println(*href)
+		}
+	}
 	log.Println("URL fetched")
 }
