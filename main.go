@@ -7,6 +7,7 @@ import (
 	"net/url"
 )
 
+// http://158.178.197.230:8081/index.html
 func fetchURL() {
 	log.Println("Fetching URL")
 
@@ -20,6 +21,7 @@ func fetchURL() {
 		log.Fatal(err)
 	}
 
+	var urls []string
 	for _, link := range links {
 		href := link.MustAttribute("href")
 		if href != nil {
@@ -30,10 +32,10 @@ func fetchURL() {
 				continue
 			}
 			fullURL := base.ResolveReference(parsedLink)
-			fmt.Println(fullURL.String())
+			urls = append(urls, fullURL.String())
 		}
 	}
-
+	fmt.Println(urls)
 	log.Println("URL fetched")
 }
 
