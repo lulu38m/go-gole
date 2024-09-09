@@ -4,30 +4,15 @@ import (
 	"fmt"
 	"github.com/go-rod/rod"
 	"log"
-	"net/http"
 	"net/url"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 func fetchURL() {
-	baseURL := "http://158.178.197.230:8081/index.html"
+	log.Println("Fetching URL")
 
-	// Request the HTML page.
-	res, err := http.Get(baseURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
-	}
-	log.Print()
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	baseURL := "https://kodoka.fr/"
+	page := rod.New().MustConnect().MustPage(baseURL)
+	links := page.MustElements("a")
 
 	// Parser l'URL de base
 	base, err := url.Parse(baseURL)
@@ -35,40 +20,23 @@ func fetchURL() {
 		log.Fatal(err)
 	}
 
-	var urls []string
-
-	// trouver les liens
-	doc.Find("a[href]").Each(func(i int, s *goquery.Selection) {
-		link, ok := s.Attr("href")
-		if !ok {
-			return
-		}
-
-		parsedLink, err := url.Parse(link)
-		if err != nil {
-			log.Println("Erreur parsing URL:", err)
-			return
-		}
-
-		fullURL := base.ResolveReference(parsedLink)
-
-		urls = append(urls, fullURL.String())
-	})
-
-	fmt.Println(urls)
-
-}
-
-func main() {
-	log.Println("Fetching URL")
-	page := rod.New().MustConnect().MustPage("https://kodoka.fr/")
-	links := page.MustElements("a")
-
 	for _, link := range links {
 		href := link.MustAttribute("href")
 		if href != nil {
-			fmt.Println(*href)
+			// Résoudre l'URL relative
+			parsedLink, err := url.Parse(*href)
+			if err != nil {
+				log.Println("Erreur parsing URL:", err)
+				continue
+			}
+			fullURL := base.ResolveReference(parsedLink)
+			fmt.Println(fullURL.String())
 		}
 	}
+
 	log.Println("URL fetched")
+}
+
+func main() {
+	fetchURL()
 }
