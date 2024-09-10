@@ -7,18 +7,14 @@ import (
 	"net/url"
 )
 
-// http://158.178.197.230:8081/index.html
-func fetchURL() {
-	log.Println("Fetching URL")
-
-	baseURL := "https://kodoka.fr/"
-	page := rod.New().MustConnect().MustPage(baseURL)
+func fetchURLsFromPage(pageURL string) ([]string, error) {
+	page := rod.New().MustConnect().MustPage(pageURL)
 	links := page.MustElements("a")
 
 	// Parser l'URL de base
-	base, err := url.Parse(baseURL)
+	base, err := url.Parse(pageURL)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	var urls []string
@@ -35,10 +31,42 @@ func fetchURL() {
 			urls = append(urls, fullURL.String())
 		}
 	}
-	fmt.Println(urls)
-	log.Println("URL fetched")
+	return urls, nil
+}
+
+func fetchRecursiveURLs(startURL string) []string {
+	visited := make(map[string]bool)
+	var result []string
+
+	//// Fonction récursive pour parcourir les pages
+	var recursiveFetch func(pageURL string)
+	recursiveFetch = func(pageURL string) {
+		if visited[pageURL] {
+			return
+		}
+		visited[pageURL] = true
+
+		urls, err := fetchURLsFromPage(pageURL)
+		if err != nil {
+			log.Println("Erreur fetching URLs from page:", err)
+			return
+		}
+
+		result = append(result, urls...)
+
+		for _, url := range urls {
+			recursiveFetch(url)
+		}
+	}
+	recursiveFetch(startURL)
+	return result
 }
 
 func main() {
-	fetchURL()
+	baseURL := "http://158.178.197.230:8081/index.html"
+	log.Println("Fetching URLs recursively")
+
+	urls := fetchRecursiveURLs(baseURL)
+	fmt.Println("All URLs found:", urls)
+	log.Println("Done")
 }
