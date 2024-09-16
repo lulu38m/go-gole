@@ -2,71 +2,67 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-rod/rod"
+	"github.com/PuerkitoBio/goquery"
 	"log"
+	"net/http"
 	"net/url"
+	"strings"
 )
 
-func fetchURLsFromPage(pageURL string) ([]string, error) {
-	page := rod.New().MustConnect().MustPage(pageURL)
-	links := page.MustElements("a")
+var visited = make(map[string]bool)
 
-	// Parser l'URL de base
-	base, err := url.Parse(pageURL)
+func fetch(urlStr string) {
+	// Check if the URL has been visited
+	if visited[urlStr] {
+		return
+	}
+	visited[urlStr] = true // Mark URL as visited
+
+	// Fetch the URL
+	res, err := http.Get(urlStr)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Fatalf("Error: Status code %d while fetching %s", res.StatusCode, urlStr)
 	}
 
-	var urls []string
-	for _, link := range links {
-		href := link.MustAttribute("href")
-		if href != nil {
-			// Résoudre l'URL relative
-			parsedLink, err := url.Parse(*href)
-			if err != nil {
-				log.Println("Erreur parsing URL:", err)
-				continue
-			}
-			fullURL := base.ResolveReference(parsedLink)
-			urls = append(urls, fullURL.String())
-		}
+	// Parse the page
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return urls, nil
+
+	// Find all links and crawl them
+	doc.Find("a").Each(func(index int, item *goquery.Selection) {
+		link, exists := item.Attr("href")
+		if exists {
+			absoluteURL := resolveURL(urlStr, link)
+			if strings.HasPrefix(absoluteURL, "http") && !strings.Contains(absoluteURL, "#") {
+				fmt.Println("URL found:", absoluteURL)
+				fetch(absoluteURL) // Recursively fetch the URL
+			}
+		}
+	})
 }
 
-func fetchRecursiveURLs(startURL string) []string {
-	visited := make(map[string]bool)
-	var result []string
-
-	//// Fonction récursive pour parcourir les pages
-	var recursiveFetch func(pageURL string)
-	recursiveFetch = func(pageURL string) {
-		if visited[pageURL] {
-			return
-		}
-		visited[pageURL] = true
-
-		urls, err := fetchURLsFromPage(pageURL)
-		if err != nil {
-			log.Println("Erreur fetching URLs from page:", err)
-			return
-		}
-
-		result = append(result, urls...)
-
-		for _, url := range urls {
-			recursiveFetch(url)
-		}
+func resolveURL(base, href string) string {
+	u, err := url.Parse(href)
+	if err != nil {
+		return ""
 	}
-	recursiveFetch(startURL)
-	return result
+	baseURL, err := url.Parse(base)
+	if err != nil {
+		return ""
+	}
+	return baseURL.ResolveReference(u).String()
 }
 
 func main() {
-	baseURL := "http://158.178.197.230:8081/index.html"
-	log.Println("Fetching URLs recursively")
-
-	urls := fetchRecursiveURLs(baseURL)
-	fmt.Println("All URLs found:", urls)
-	log.Println("Done")
+	startURL := "https://www.kodoka.fr/index.php"
+	fmt.Println("Fetching URLs recursively")
+	fetch(startURL)
+	fmt.Println("Done")
 }
