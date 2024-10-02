@@ -26,4 +26,4 @@ Le travail se concentre maintenant sur :
 
 ---
 
-<p style="text-align: center;">✨ Merci d'avoir pris le temps de découvrir le projet <strong>Gogole</strong> ! ✨</p>
+<p style="text-align: center;">✨ Merci d'avoir pris le temps de découvrir le projet <strong>Go-gole</strong> ! ✨</p>
