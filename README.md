@@ -5,7 +5,6 @@ Bienvenue dans le projet **Go-gole** ! 🌐 Un moteur de recherche en cours de d
 ## ⚙️ Technologies Utilisées
 - 🐹 **Go** - Backend et gestion des crawlers
 - 💻 **Svelte** - Framework frontend léger et réactif
-- 🖥️ **Wails** - Pour construire des applications de bureau en Go et Web
 - 🎨 **CSS** - Pour le style de l'interface
 - 🛠️ **shadcn** - Composants réutilisables et design system
 
