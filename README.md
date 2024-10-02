@@ -5,8 +5,8 @@ Bienvenue dans le projet **Go-gole** ! 🌐 Un moteur de recherche en cours de d
 ## ⚙️ Technologies Utilisées
 - 🐹 **Go** - Backend et gestion des crawlers
 - 💻 **Svelte** - Framework frontend léger et réactif
-- 🎨 **CSS** - Pour le style de l'interface
-- 🛠️ **shadcn** - Composants réutilisables et design system
+- 🎨 **Tailwind** - Pour le style de l'interface
+- 🛠️ **Shadcn** - Composants réutilisables et design system
 
 ## ✨ Fonctionnalités
 - 🚜 Développement d'un <span style="background-color: #fffae6; padding: 2px 6px; border-radius: 3px; color: #cc7000; font-weight: bold;">crawler</span> pour indexer le web 🌍
