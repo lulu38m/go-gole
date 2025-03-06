@@ -101,7 +101,7 @@ func resolveURL(base, href string) string {
 
 // Fonction principale
 func main() {
-	startURL := "https://www.kodoka.fr/"
+	startURL := "https://www.test.fr/"
 
 	var wg sync.WaitGroup
 	for i := 1; i <= maxWorkers; i++ {
